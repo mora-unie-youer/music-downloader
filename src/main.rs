@@ -63,6 +63,20 @@ fn search_lyrics(title: &str, author: &str) -> Result<String> {
     Ok(results[0].1.clone())
 }
 
+fn fetch_lyrics(link: &str) -> Result<String> {
+    let url = format!("https://www.musixmatch.com/{}", link);
+    let response = reqwest::blocking::get(url)?;
+
+    let html = response.text()?;
+    let document = Html::parse_document(&html);
+
+    Ok(document
+        .select(&Selector::parse("span.lyrics__content__ok").unwrap())
+        .map(|elem| elem.inner_html())
+        .collect::<Vec<_>>()
+        .join("\n"))
+}
+
 fn main() -> Result<()> {
     Ok(())
 }
